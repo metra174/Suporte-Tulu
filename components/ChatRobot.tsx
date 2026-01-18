@@ -39,47 +39,43 @@ const ChatRobot: React.FC = () => {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      triggerBotResponse(
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-             <span className="text-2xl">🤖</span>
-             <p className="font-black text-xl tracking-tight">Olá! Sou o Tulu Bot v5.0.</p>
-          </div>
-          <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
-            Detectei instabilidades na sua Landing Page. Para resolvermos agora, qual destas falhas está a ocorrer?
-          </p>
-          <div className={`${theme === 'dark' ? 'bg-[#27AE60]/10 border-[#27AE60]/20' : 'bg-blue-50 border-blue-100'} border-2 p-5 rounded-3xl transition-colors`}>
-             <p className={`text-[10px] font-black leading-tight uppercase tracking-[0.2em] mb-2 ${theme === 'dark' ? 'text-[#27AE60]' : 'text-blue-700'}`}>
-               📌 GUIA RÁPIDO:
-             </p>
-             <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-blue-600'}`}>
-               Preencha os dados e clique em <strong>"FINALIZAR"</strong> para liberar o suporte humano. Ative o <strong>Modo Full Screen (↔️)</strong> para melhor leitura.
-             </p>
-          </div>
-        </div>
-      );
-      setStep(1);
+      startConversation();
     }
     scrollToBottom();
   }, [isOpen, messages, theme]);
 
-  const triggerBotResponse = (content: React.ReactNode, delay: number = 800) => {
+  const triggerBotResponse = (content: React.ReactNode, delay: number = 1000) => {
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
-      setMessages(prev => [...prev, { id: Date.now(), type: 'bot', content }]);
+      setMessages(prev => [...prev, { id: Date.now() + Math.random(), type: 'bot', content }]);
     }, delay);
   };
 
   const addUserMessage = (content: React.ReactNode) => {
-    setMessages(prev => [...prev, { id: Date.now() + 1, type: 'user', content }]);
+    setMessages(prev => [...prev, { id: Date.now() + Math.random(), type: 'user', content }]);
+  };
+
+  const startConversation = () => {
+    triggerBotResponse(
+      <div className="space-y-2">
+        <p className="font-black text-xl">Olá! Eu sou o assistente da Tulu. 🤖</p>
+        <p>Antes de falarmos de trabalho, como está a ser o seu dia?</p>
+      </div>
+    );
+    setStep(1); // Esperando resposta sobre o dia
+  };
+
+  const checkSentiment = (text: string) => {
+    const negatives = ['mal', 'ruim', 'não', 'triste', 'pessimo', 'difícil', 'complicado', 'frustrado'];
+    return negatives.some(word => text.toLowerCase().includes(word));
   };
 
   const handleMotiveSelect = (motive: Motive, label: string) => {
     addUserMessage(label);
     setFormData(prev => ({ ...prev, motive }));
     
-    let followUp = null;
+    let followUp = "";
     switch(motive) {
       case Motive.TECH_ERROR:
         followUp = "Links quebrados são prioridade máxima! 🚨 O erro está no botão do WhatsApp ou em outro link da página?";
@@ -92,13 +88,15 @@ const ChatRobot: React.FC = () => {
         break;
       case Motive.SPEED:
         followUp = "Velocidade é vendas! ⏱️ A página demora quanto tempo para carregar? Já testou em outra rede?";
+      case Motive.OTHERS:
+        followUp = "Anotei que é um erro novo na minha memória. Descreva detalhadamente o que está a acontecer.";
         break;
       default:
         followUp = "Descreva detalhadamente o erro técnico ou a dúvida que você possui no momento.";
     }
 
     triggerBotResponse(followUp);
-    setStep(2);
+    setStep(5); // Esperando followUpAnswer
   };
 
   const handleInfoSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -107,35 +105,61 @@ const ChatRobot: React.FC = () => {
     if (!input) return;
 
     addUserMessage(input);
-    
-    if (step === 2) {
-      setFormData(prev => ({ ...prev, followUpAnswer: input }));
-      triggerBotResponse("Certo. Para o registro oficial do seu chamado: Qual seu nome completo e o nome da sua empresa?");
+    const hasNegativeVibe = checkSentiment(input);
+
+    if (step === 1) {
+      triggerBotResponse(
+        <div className="space-y-2">
+          {hasNegativeVibe && <p className="text-[#27AE60] font-bold italic">Sinto muito por ouvir isso. Vou guardar essa informação na minha memória de prioridade para que o nosso suporte humano te dê um carinho especial. ❤️</p>}
+          <p>Espero que tudo corra bem com a sua família e que os negócios prosperem! Como vai o ânimo hoje?</p>
+        </div>
+      );
+      setStep(2);
+    } else if (step === 2) {
+      const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      triggerBotResponse(
+        <div className="space-y-2">
+          <p>Por aqui, são agora <strong>{currentTime}</strong> e eu sinto-me 100% carregado para te ajudar. ✨</p>
+          <p>Você gosta dos serviços que a Tulu tem oferecido até agora?</p>
+        </div>
+      );
       setStep(3);
     } else if (step === 3) {
-      setFormData(prev => ({ ...prev, fullName: input, companyName: input })); 
-      triggerBotResponse("Anotado. Qual o seu melhor e-mail para enviarmos o código do protocolo?");
-      setStep(4);
-    } else if (step === 4) {
-      setFormData(prev => ({ ...prev, email: input }));
-      triggerBotResponse("Em qual Província de Angola você está?");
-      setStep(5);
+      triggerBotResponse(
+        <div className="space-y-3">
+          <p>Agora, para que eu possa resolver o seu problema com a Landing Page, diga-me qual destes erros está a acontecer:</p>
+        </div>
+      );
+      setStep(4); // Mostrar Botões
+    } else if (step === 5) {
+      setFormData(prev => ({ ...prev, followUpAnswer: input }));
+      triggerBotResponse("Com quem tenho o prazer de falar e qual o nome da sua empresa? (Ex: João - Padaria Central)");
+      setStep(6);
     } else if (step === 6) {
+      const [name, company] = input.split(' - ');
+      setFormData(prev => ({ ...prev, fullName: name || input, companyName: company || 'Empresa Própria' }));
+      triggerBotResponse("Pode confirmar o seu melhor E-mail? Vou enviar uma cópia do protocolo para si e para tulu.geral@gmail.com.");
+      setStep(7);
+    } else if (step === 7) {
+      setFormData(prev => ({ ...prev, email: input }));
+      triggerBotResponse("Em qual das 18 províncias de Angola você está?");
+      setStep(8); // Menu Províncias
+    } else if (step === 9) {
       setFormData(prev => ({ ...prev, address: input }));
       triggerBotResponse(
         <div className="space-y-4">
           <div className={`${theme === 'dark' ? 'bg-black/50 border-white/5' : 'bg-[#2C3E50] border-gray-100'} p-5 text-white rounded-[2rem] shadow-2xl border`}>
-             <p className="font-black text-[10px] uppercase tracking-[0.3em] text-[#27AE60] mb-3">Relatório Técnico Tulu</p>
+             <p className="font-black text-[10px] uppercase tracking-[0.3em] text-[#27AE60] mb-3">Protocolo Inteligente Tulu</p>
              <div className="text-xs space-y-2 opacity-90">
-                <div className="flex justify-between border-b border-white/10 pb-1"><span>ERRO:</span> <span className="font-bold">{formData.motive}</span></div>
-                <div className="flex flex-col space-y-1"><span>DETALHE:</span> <span className="font-bold italic">{formData.followUpAnswer}</span></div>
-                <div className="flex justify-between border-t border-white/10 pt-1"><span>LOCAL:</span> <span className="font-bold uppercase">{formData.province}</span></div>
+                <div className="flex justify-between border-b border-white/10 pb-1"><span>STATUS:</span> <span className="font-bold text-green-400">AGUARDANDO WHATSAPP</span></div>
+                <div className="flex justify-between"><span>ASSUNTO:</span> <span className="font-bold uppercase">{formData.motive}</span></div>
+                <div className="flex justify-between"><span>PROVÍNCIA:</span> <span className="font-bold">{formData.province}</span></div>
              </div>
           </div>
-          <p className="font-bold text-lg">Chamado pronto! Deseja falar com o suporte humano agora via WhatsApp?</p>
+          <p className="font-bold text-lg">Deseja que eu envie todo este nosso histórico para o atendente humano no WhatsApp agora mesmo?</p>
         </div>
       );
-      setStep(7);
+      setStep(10);
     }
 
     (e.target as any).info.value = "";
@@ -144,39 +168,35 @@ const ChatRobot: React.FC = () => {
   const handleProvinceSelect = (province: string) => {
     addUserMessage(province);
     setFormData(prev => ({ ...prev, province }));
-    triggerBotResponse("Por fim, qual o endereço físico (Rua/Bairro) da empresa?");
-    setStep(6);
+    triggerBotResponse("Qual o seu endereço físico completo?");
+    setStep(9);
   };
 
   const finishFlow = (toWhatsApp: boolean) => {
-    addUserMessage(toWhatsApp ? "FINALIZAR E SUPORTE HUMANO 🏁" : "Fechar chat.");
+    addUserMessage(toWhatsApp ? "ENVIAR AO WHATSAPP AGORA 🏁" : "Fechar chat.");
     
     if (toWhatsApp) {
-      const message = `🚨 CHAMADO TULU TECH\n\n` +
+      const message = `🚨 CHAMADO TULU TECH - CONVERSA HISTÓRICA\n\n` +
                       `* Erro: ${formData.motive}\n` +
                       `* Contexto: ${formData.followUpAnswer}\n` +
                       `* Cliente: ${formData.fullName}\n` +
                       `* Empresa: ${formData.companyName}\n` +
-                      `* Local: ${formData.province}\n` +
+                      `* Província: ${formData.province}\n` +
                       `* Endereço: ${formData.address}\n\n` +
-                      `Solicito atendimento prioritário.`;
+                      `Desejo atendimento especializado baseado no histórico do Bot.`;
 
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodedMessage}`, '_blank');
     }
 
-    triggerBotResponse("Protocolo finalizado. Nossos consultores entrarão em contacto. Tulu Tech agradece pela confiança! 🚀");
-    setStep(8);
+    triggerBotResponse("Protocolo finalizado. Tulu Tech agradece pela confiança! 🚀");
+    setStep(11);
   };
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-  // Unified logic for all devices to cover the screen
-  // Non-expanded: Floating on PC, taking more space on mobile.
-  // Expanded: True full screen everywhere.
-  
   const containerClasses = isExpanded 
-    ? "fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center"
+    ? "fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-2 md:p-6"
     : "fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[100] flex flex-col items-end";
 
   const chatBoxClasses = `
@@ -196,7 +216,7 @@ const ChatRobot: React.FC = () => {
             <div className="flex items-center space-x-3 md:space-x-5 relative z-10">
               <div className="relative">
                 <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-[#27AE60] to-[#219150] rounded-xl md:rounded-2xl flex items-center justify-center border-2 border-white/20 shadow-2xl overflow-hidden">
-                   <span className="font-black text-white text-lg md:text-2xl tracking-tighter">TL</span>
+                   <span className="font-black text-white text-lg md:text-2xl tracking-tighter">TULU</span>
                 </div>
                 <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -204,8 +224,8 @@ const ChatRobot: React.FC = () => {
                 </span>
               </div>
               <div>
-                <p className="font-black text-sm md:text-xl tracking-tighter uppercase">Tulu Bot Pro</p>
-                <p className="text-[8px] md:text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Triagem Ativa</p>
+                <p className="font-black text-sm md:text-xl tracking-tighter uppercase">Assistente Tulu</p>
+                <p className="text-[8px] md:text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Conexão Proativa</p>
               </div>
             </div>
             
@@ -230,7 +250,7 @@ const ChatRobot: React.FC = () => {
               <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn space-x-2 md:space-x-4 items-end`}>
                 {msg.type === 'bot' && (
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#27AE60] flex-shrink-0 flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-xl mb-1">
-                    TULU
+                    BOT
                   </div>
                 )}
                 <div className={`max-w-[85%] md:max-w-[70%] p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-sm md:text-lg shadow-sm leading-relaxed border transition-all ${
@@ -247,7 +267,7 @@ const ChatRobot: React.FC = () => {
             {isTyping && (
               <div className="flex justify-start space-x-2 md:space-x-4 animate-fadeIn items-end">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#27AE60] flex-shrink-0 flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-xl mb-1">
-                  TULU
+                  BOT
                 </div>
                 <TypingIndicator theme={theme} />
               </div>
@@ -257,14 +277,14 @@ const ChatRobot: React.FC = () => {
 
           {/* Interaction Area */}
           <div className={`p-4 md:p-12 border-t transition-colors z-20 ${theme === 'dark' ? 'bg-[#0a0a0a] border-gray-800' : 'bg-white border-gray-100'}`}>
-            {step === 1 && (
-              <div className={`grid gap-3 ${isExpanded ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}>
+            {step === 4 && (
+              <div className={`grid gap-3 ${isExpanded ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4' : 'grid-cols-1'}`}>
                 {MOTIVES.map(m => (
                   <button 
                     key={m.id}
                     onClick={() => handleMotiveSelect(m.id, m.label)}
                     className={`
-                      w-full text-left p-4 md:p-6 text-xs md:text-base font-bold rounded-2xl md:rounded-[1.5rem] transition-all border flex items-center group shadow-md
+                      w-full text-left p-4 md:p-6 text-xs md:text-sm font-bold rounded-2xl md:rounded-[1.5rem] transition-all border flex items-center group shadow-md
                       ${theme === 'dark' ? 'bg-[#1e1e1e] border-gray-800 hover:bg-[#27AE60] hover:border-[#27AE60]' : 'bg-gray-50 border-gray-100 hover:bg-[#27AE60] hover:text-white'}
                     `}
                   >
@@ -275,28 +295,28 @@ const ChatRobot: React.FC = () => {
               </div>
             )}
 
-            {(step === 2 || step === 3 || step === 4 || step === 6) && (
+            {(step === 1 || step === 2 || step === 3 || step === 5 || step === 6 || step === 7 || step === 9) && (
               <form onSubmit={handleInfoSubmit} className="flex flex-col space-y-4 max-w-4xl mx-auto">
                 <div className="flex space-x-2 md:space-x-4">
                   <input 
                     autoFocus
                     name="info"
                     autoComplete="off"
-                    placeholder="Sua resposta..."
+                    placeholder="Escreva sua resposta..."
                     className={`
                       flex-1 p-4 md:p-8 text-sm md:text-xl rounded-[1.5rem] md:rounded-[2rem] outline-none border-2 transition-all shadow-inner
                       ${theme === 'dark' ? 'bg-[#1e1e1e] border-gray-800 focus:border-[#27AE60] text-white' : 'bg-gray-50 border-gray-100 focus:border-[#27AE60] text-[#2C3E50]'}
                     `}
                   />
                   <button type="submit" className="bg-[#27AE60] text-white px-5 md:px-12 rounded-[1.5rem] md:rounded-[2rem] hover:bg-[#219150] transition-all shadow-xl active:scale-95 text-lg font-bold">
-                    OK
+                    ENVIAR
                   </button>
                 </div>
-                <p className="text-[10px] text-center text-gray-500 font-black uppercase tracking-[0.2em]">Pressione ENTER</p>
+                <p className="text-[10px] text-center text-gray-500 font-black uppercase tracking-[0.2em]">Pressione ENTER para falar com o robô</p>
               </form>
             )}
 
-            {step === 5 && (
+            {step === 8 && (
               <div className={`grid gap-2 ${isExpanded ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-6' : 'grid-cols-2'}`}>
                 {PROVINCES.map(p => (
                   <button 
@@ -313,13 +333,13 @@ const ChatRobot: React.FC = () => {
               </div>
             )}
 
-            {step === 7 && (
+            {step === 10 && (
               <div className={`flex flex-col space-y-4 md:space-y-5 ${isExpanded ? 'max-w-2xl mx-auto' : ''}`}>
                 <button 
                   onClick={() => finishFlow(true)}
                   className="w-full py-5 md:py-10 bg-gradient-to-r from-[#27AE60] to-[#219150] text-white rounded-[1.5rem] md:rounded-[2.5rem] text-lg md:text-2xl font-black shadow-[0_20px_60px_rgba(39,174,96,0.4)] hover:scale-[1.02] transition-all border-b-4 md:border-b-8 border-[#1a7440] active:border-b-0 active:translate-y-1"
                 >
-                  FINALIZAR & WHATSAPP 🏁
+                  SIM, FALAR NO WHATSAPP AGORA 🏁
                 </button>
                 <button 
                   onClick={() => finishFlow(false)}
@@ -330,12 +350,12 @@ const ChatRobot: React.FC = () => {
               </div>
             )}
 
-            {step === 8 && (
+            {step === 11 && (
               <button 
                 onClick={() => { setMessages([]); setStep(0); setIsOpen(false); setIsExpanded(false); }}
                 className={`w-full py-4 md:py-6 rounded-2xl md:rounded-[2rem] text-xs md:text-base font-black transition-all border-2 border-dashed ${theme === 'dark' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}
               >
-                SAIR DO SUPORTE TULU
+                SAIR DO ATENDIMENTO
               </button>
             )}
           </div>
@@ -350,7 +370,7 @@ const ChatRobot: React.FC = () => {
         >
           <div className={`absolute -top-16 right-0 text-[10px] font-black py-3 px-6 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0 whitespace-nowrap pointer-events-none border flex items-center space-x-2 ${theme === 'dark' ? 'bg-[#2C3E50] border-gray-700' : 'bg-white border-gray-100 text-[#2C3E50]'}`}>
             <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-            <span>Relatar Erro na Landing Page? 🤖</span>
+            <span>Relatar Problema? 🤖</span>
           </div>
           
           {isOpen ? (
