@@ -10,10 +10,10 @@ type Message = {
 };
 
 const TypingIndicator: React.FC<{ theme: 'light' | 'dark' }> = ({ theme }) => (
-  <div className={`flex items-center space-x-1 p-3 rounded-2xl ${theme === 'dark' ? 'bg-[#2d2d2d]' : 'bg-white'} w-16 shadow-sm border ${theme === 'dark' ? 'border-gray-800' : 'border-gray-100'}`}>
-    <div className="w-1.5 h-1.5 bg-[#27AE60] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-    <div className="w-1.5 h-1.5 bg-[#27AE60] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-    <div className="w-1.5 h-1.5 bg-[#27AE60] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+  <div className={`flex items-center space-x-1.5 p-4 rounded-2xl ${theme === 'dark' ? 'bg-[#2d2d2d]' : 'bg-white'} w-20 shadow-sm border ${theme === 'dark' ? 'border-gray-800' : 'border-gray-100'}`}>
+    <div className="w-2 h-2 bg-[#27AE60] rounded-full animate-bounce [animation-duration:0.6s]" style={{ animationDelay: '0ms' }}></div>
+    <div className="w-2 h-2 bg-[#27AE60] rounded-full animate-bounce [animation-duration:0.6s]" style={{ animationDelay: '150ms' }}></div>
+    <div className="w-2 h-2 bg-[#27AE60] rounded-full animate-bounce [animation-duration:0.6s]" style={{ animationDelay: '300ms' }}></div>
   </div>
 );
 
@@ -40,15 +40,20 @@ const ChatRobot: React.FC = () => {
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       triggerBotResponse(
-        <div className="space-y-3">
-          <p className="font-extrabold text-lg">Olá! Sou o Tulu Bot v4.0. 🤖</p>
-          <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>Identifiquei que você está com dificuldades na sua Landing Page. Qual é o tipo de erro que está a enfrentar?</p>
-          <div className={`${theme === 'dark' ? 'bg-[#27AE60]/10 border-[#27AE60]/30' : 'bg-blue-50 border-blue-100'} border p-4 rounded-2xl`}>
-             <p className={`text-[11px] font-black leading-tight uppercase tracking-widest ${theme === 'dark' ? 'text-[#27AE60]' : 'text-blue-700'}`}>
-               🚀 INSTRUÇÃO DE SUPORTE:
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2">
+             <span className="text-2xl">🤖</span>
+             <p className="font-black text-xl tracking-tight">Olá! Sou o Tulu Bot v5.0.</p>
+          </div>
+          <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+            Detectei instabilidades na sua Landing Page. Para resolvermos agora, qual destas falhas está a ocorrer?
+          </p>
+          <div className={`${theme === 'dark' ? 'bg-[#27AE60]/10 border-[#27AE60]/20' : 'bg-blue-50 border-blue-100'} border-2 p-5 rounded-3xl transition-colors`}>
+             <p className={`text-[10px] font-black leading-tight uppercase tracking-[0.2em] mb-2 ${theme === 'dark' ? 'text-[#27AE60]' : 'text-blue-700'}`}>
+               📌 GUIA RÁPIDO:
              </p>
-             <p className={`text-[11px] mt-1 leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-blue-600'}`}>
-               Ao terminar, aperte em <strong>"FINALIZAR"</strong> para abrir o WhatsApp. Use <strong>↔️</strong> para expandir e <strong>{theme === 'dark' ? '☀️' : '🌙'}</strong> para mudar o modo.
+             <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-blue-600'}`}>
+               Preencha os dados e clique em <strong>"FINALIZAR"</strong> para liberar o suporte humano. Ative o <strong>Modo Full Screen (↔️)</strong> para melhor leitura.
              </p>
           </div>
         </div>
@@ -58,7 +63,7 @@ const ChatRobot: React.FC = () => {
     scrollToBottom();
   }, [isOpen, messages, theme]);
 
-  const triggerBotResponse = (content: React.ReactNode, delay: number = 1000) => {
+  const triggerBotResponse = (content: React.ReactNode, delay: number = 800) => {
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
@@ -74,53 +79,25 @@ const ChatRobot: React.FC = () => {
     addUserMessage(label);
     setFormData(prev => ({ ...prev, motive }));
     
-    let followUpResponse = null;
+    let followUp = null;
     switch(motive) {
       case Motive.TECH_ERROR:
-        followUpResponse = (
-          <div className="space-y-2">
-            <p><strong>Entendido!</strong> Links que não funcionam são críticos. 🕵️‍♂️</p>
-            <p>O erro acontece em todos os botões ou apenas em um específico (como o botão do WhatsApp)?</p>
-          </div>
-        );
+        followUp = "Links quebrados são prioridade máxima! 🚨 O erro está no botão do WhatsApp ou em outro link da página?";
         break;
       case Motive.CONVERSION:
-        followUpResponse = (
-          <div className="space-y-2">
-            <p><strong>Baixa conversão?</strong> Vamos analisar o Copywriting e o Design. 📉</p>
-            <p>Você recebe visitas mas ninguém clica, ou a página não tem visitas nenhumas?</p>
-          </div>
-        );
+        followUp = "Vamos otimizar sua taxa de conversão! 📈 Você está recebendo muitos cliques mas nenhuma venda, ou as visitas sumiram?";
         break;
       case Motive.DESIGN:
-        followUpResponse = (
-          <div className="space-y-2">
-            <p><strong>O visual é a porta de entrada!</strong> 🎨</p>
-            <p>O erro é texto encavalitado, imagens que não carregam ou as cores erradas?</p>
-          </div>
-        );
+        followUp = "Design é autoridade! 🎨 O que está desconfigurado? Imagens, textos ou cores no telemóvel?";
         break;
       case Motive.SPEED:
-        followUpResponse = (
-          <div className="space-y-2">
-            <p><strong>Páginas lentas custam caro.</strong> ⏱️</p>
-            <p>Isso acontece mais no telemóvel ou no computador?</p>
-          </div>
-        );
-        break;
-      case Motive.CONTENT:
-        followUpResponse = (
-          <div className="space-y-2">
-            <p><strong>Conteúdo é confiança.</strong> 📝</p>
-            <p>É um preço desatualizado, erro de ortografia ou endereço mudou?</p>
-          </div>
-        );
+        followUp = "Velocidade é vendas! ⏱️ A página demora quanto tempo para carregar? Já testou em outra rede?";
         break;
       default:
-        followUpResponse = "Descreva detalhadamente o erro (ex: código 404, 500 ou texto sumindo).";
+        followUp = "Descreva detalhadamente o erro técnico ou a dúvida que você possui no momento.";
     }
 
-    triggerBotResponse(followUpResponse);
+    triggerBotResponse(followUp);
     setStep(2);
   };
 
@@ -133,29 +110,29 @@ const ChatRobot: React.FC = () => {
     
     if (step === 2) {
       setFormData(prev => ({ ...prev, followUpAnswer: input }));
-      triggerBotResponse("Perfeito. Agora, qual o seu nome completo e o nome da sua empresa?");
+      triggerBotResponse("Certo. Para o registro oficial do seu chamado: Qual seu nome completo e o nome da sua empresa?");
       setStep(3);
     } else if (step === 3) {
       setFormData(prev => ({ ...prev, fullName: input, companyName: input })); 
-      triggerBotResponse("Qual o seu melhor e-mail para enviarmos o protocolo?");
+      triggerBotResponse("Anotado. Qual o seu melhor e-mail para enviarmos o código do protocolo?");
       setStep(4);
     } else if (step === 4) {
       setFormData(prev => ({ ...prev, email: input }));
-      triggerBotResponse("Em qual Província de Angola a sua empresa está sediada?");
+      triggerBotResponse("Em qual Província de Angola você está?");
       setStep(5);
     } else if (step === 6) {
       setFormData(prev => ({ ...prev, address: input }));
       triggerBotResponse(
-        <div className="space-y-3">
-          <div className={`${theme === 'dark' ? 'bg-black/40 border-gray-800' : 'bg-[#2C3E50] border-[#2C3E50]'} p-4 text-white rounded-2xl shadow-inner border`}>
-             <p className="font-black text-[10px] uppercase tracking-widest text-[#27AE60] mb-2">Relatório de Triagem</p>
-             <div className="text-[11px] space-y-1 opacity-90">
-                <p><strong>ASSUNTO:</strong> {formData.motive}</p>
-                <p><strong>SITUAÇÃO:</strong> {formData.followUpAnswer}</p>
-                <p><strong>LOCAL:</strong> {formData.province} - {input}</p>
+        <div className="space-y-4">
+          <div className={`${theme === 'dark' ? 'bg-black/50 border-white/5' : 'bg-[#2C3E50] border-gray-100'} p-5 text-white rounded-[2rem] shadow-2xl border`}>
+             <p className="font-black text-[10px] uppercase tracking-[0.3em] text-[#27AE60] mb-3">Relatório Técnico Tulu</p>
+             <div className="text-xs space-y-2 opacity-90">
+                <div className="flex justify-between border-b border-white/10 pb-1"><span>ERRO:</span> <span className="font-bold">{formData.motive}</span></div>
+                <div className="flex flex-col space-y-1"><span>DETALHE:</span> <span className="font-bold italic">{formData.followUpAnswer}</span></div>
+                <div className="flex justify-between border-t border-white/10 pt-1"><span>LOCAL:</span> <span className="font-bold uppercase">{formData.province}</span></div>
              </div>
           </div>
-          <p className="font-bold">Armazenei tudo! Deseja enviar estes dados agora para o suporte humano no WhatsApp?</p>
+          <p className="font-bold text-lg">Chamado pronto! Deseja falar com o suporte humano agora via WhatsApp?</p>
         </div>
       );
       setStep(7);
@@ -167,71 +144,80 @@ const ChatRobot: React.FC = () => {
   const handleProvinceSelect = (province: string) => {
     addUserMessage(province);
     setFormData(prev => ({ ...prev, province }));
-    triggerBotResponse("Qual o endereço físico completo da sua empresa?");
+    triggerBotResponse("Por fim, qual o endereço físico (Rua/Bairro) da empresa?");
     setStep(6);
   };
 
   const finishFlow = (toWhatsApp: boolean) => {
-    addUserMessage(toWhatsApp ? "FINALIZAR E IR AO WHATSAPP 🏁" : "Apenas fechar.");
+    addUserMessage(toWhatsApp ? "FINALIZAR E SUPORTE HUMANO 🏁" : "Fechar chat.");
     
     if (toWhatsApp) {
-      const message = `🚨 NOVO CHAMADO - TULU TECH\n\n` +
+      const message = `🚨 CHAMADO TULU TECH\n\n` +
                       `* Erro: ${formData.motive}\n` +
-                      `* Detalhe: ${formData.followUpAnswer}\n` +
-                      `* Nome: ${formData.fullName}\n` +
+                      `* Contexto: ${formData.followUpAnswer}\n` +
+                      `* Cliente: ${formData.fullName}\n` +
                       `* Empresa: ${formData.companyName}\n` +
-                      `* Província: ${formData.province}\n` +
-                      `* Endereço: ${formData.address}\n` +
-                      `* E-mail: ${formData.email}\n\n` +
-                      `Desejo atendimento especializado.`;
+                      `* Local: ${formData.province}\n` +
+                      `* Endereço: ${formData.address}\n\n` +
+                      `Solicito atendimento prioritário.`;
 
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodedMessage}`, '_blank');
     }
 
-    triggerBotResponse("Protocolo registrado. Nossos especialistas entrarão em contacto. Tulu Tech agradece! ✨");
+    triggerBotResponse("Protocolo finalizado. Nossos consultores entrarão em contacto. Tulu Tech agradece pela confiança! 🚀");
     setStep(8);
   };
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
+  // Unified logic for all devices to cover the screen
+  // Non-expanded: Floating on PC, taking more space on mobile.
+  // Expanded: True full screen everywhere.
+  
+  const containerClasses = isExpanded 
+    ? "fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center"
+    : "fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[100] flex flex-col items-end";
+
+  const chatBoxClasses = `
+    transition-all duration-500 ease-in-out flex flex-col overflow-hidden border shadow-2xl
+    ${theme === 'dark' ? 'bg-[#141414] border-gray-800 text-white' : 'bg-white border-gray-100 text-[#2C3E50]'}
+    ${isExpanded 
+        ? 'w-full h-full md:max-w-[1200px] md:max-h-[90vh] md:rounded-[3rem]' 
+        : 'w-[calc(100vw-2rem)] md:w-[450px] h-[75vh] md:h-[650px] rounded-[2.5rem]'}
+  `;
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className={containerClasses}>
       {isOpen && (
-        <div className={`
-          rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] flex flex-col mb-6 overflow-hidden border transition-all duration-500
-          ${theme === 'dark' ? 'bg-[#1a1a1a] border-gray-800 text-white' : 'bg-white border-gray-100 text-[#2C3E50]'}
-          ${isExpanded ? 'w-[90vw] h-[85vh] md:w-[75vw]' : 'w-80 md:w-[450px] h-[650px]'}
-        `}>
+        <div className={chatBoxClasses}>
           {/* Header */}
-          <div className={`p-6 flex items-center justify-between shadow-xl relative transition-colors ${theme === 'dark' ? 'bg-[#121212]' : 'bg-gradient-to-r from-[#2C3E50] to-[#1a252f] text-white'}`}>
-            <div className="flex items-center space-x-4 relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#27AE60] to-[#219150] rounded-2xl flex items-center justify-center border-2 border-white/10 shadow-lg group">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                   <span className="font-black text-white text-xl">T</span>
+          <div className={`p-4 md:p-8 flex items-center justify-between shadow-2xl relative transition-colors z-20 ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-gradient-to-r from-[#2C3E50] to-[#1a252f] text-white'}`}>
+            <div className="flex items-center space-x-3 md:space-x-5 relative z-10">
+              <div className="relative">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-[#27AE60] to-[#219150] rounded-xl md:rounded-2xl flex items-center justify-center border-2 border-white/20 shadow-2xl overflow-hidden">
+                   <span className="font-black text-white text-lg md:text-2xl tracking-tighter">TL</span>
                 </div>
+                <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500"></span>
+                </span>
               </div>
               <div>
-                <p className={`font-black text-lg tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-white'}`}>TULU BOT PRO</p>
-                <div className="flex items-center space-x-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <p className="text-[9px] text-green-400 font-black uppercase tracking-widest">Atendimento Ativo</p>
-                </div>
+                <p className="font-black text-sm md:text-xl tracking-tighter uppercase">Tulu Bot Pro</p>
+                <p className="text-[8px] md:text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Triagem Ativa</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-1 relative z-10">
-              <button onClick={toggleTheme} className="hover:bg-white/10 p-2.5 rounded-2xl transition-all">
+            <div className="flex items-center space-x-1 md:space-x-2 relative z-10">
+              <button onClick={toggleTheme} className="hover:bg-white/10 p-2 md:p-3 rounded-xl transition-all" title="Tema">
                 {theme === 'dark' ? '☀️' : '🌙'}
               </button>
-              <button onClick={() => setIsExpanded(!isExpanded)} className="hover:bg-white/10 p-2.5 rounded-2xl transition-all">
-                ↔️
+              <button onClick={() => setIsExpanded(!isExpanded)} className="hover:bg-white/10 p-2 md:p-3 rounded-xl transition-all" title="Full Screen">
+                {isExpanded ? '↙️' : '↔️'}
               </button>
-              <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-2.5 rounded-2xl transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-2 md:p-3 rounded-xl transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
@@ -239,19 +225,19 @@ const ChatRobot: React.FC = () => {
           </div>
 
           {/* Messages Area */}
-          <div className={`flex-1 overflow-y-auto p-6 md:p-8 space-y-6 transition-colors ${theme === 'dark' ? 'bg-[#1a1a1a]' : 'bg-[#F9FBFC]'}`}>
+          <div className={`flex-1 overflow-y-auto p-4 md:p-10 space-y-6 md:space-y-8 transition-colors ${theme === 'dark' ? 'bg-[#0f0f0f]' : 'bg-[#F8FAFB]'}`}>
             {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn space-x-3`}>
+              <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn space-x-2 md:space-x-4 items-end`}>
                 {msg.type === 'bot' && (
-                  <div className="w-8 h-8 rounded-full bg-[#27AE60] flex-shrink-0 flex items-center justify-center text-[10px] font-black text-white shadow-md">
-                    TB
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#27AE60] flex-shrink-0 flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-xl mb-1">
+                    TULU
                   </div>
                 )}
-                <div className={`max-w-[85%] p-5 rounded-3xl text-sm md:text-base shadow-sm leading-relaxed border transition-colors ${
+                <div className={`max-w-[85%] md:max-w-[70%] p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-sm md:text-lg shadow-sm leading-relaxed border transition-all ${
                   msg.type === 'user' 
-                    ? 'bg-[#27AE60] text-white rounded-tr-none border-[#27AE60]' 
+                    ? 'bg-gradient-to-br from-[#27AE60] to-[#219150] text-white rounded-tr-none border-[#27AE60]' 
                     : theme === 'dark' 
-                      ? 'bg-[#2d2d2d] text-white rounded-tl-none border-gray-800' 
+                      ? 'bg-[#1e1e1e] text-white rounded-tl-none border-gray-800' 
                       : 'bg-white text-gray-700 rounded-tl-none border-gray-100'
                 }`}>
                   {msg.content}
@@ -259,9 +245,9 @@ const ChatRobot: React.FC = () => {
               </div>
             ))}
             {isTyping && (
-              <div className="flex justify-start space-x-3 animate-fadeIn">
-                <div className="w-8 h-8 rounded-full bg-[#27AE60] flex-shrink-0 flex items-center justify-center text-[10px] font-black text-white shadow-md">
-                  TB
+              <div className="flex justify-start space-x-2 md:space-x-4 animate-fadeIn items-end">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#27AE60] flex-shrink-0 flex items-center justify-center text-[8px] md:text-[10px] font-black text-white shadow-xl mb-1">
+                  TULU
                 </div>
                 <TypingIndicator theme={theme} />
               </div>
@@ -270,55 +256,55 @@ const ChatRobot: React.FC = () => {
           </div>
 
           {/* Interaction Area */}
-          <div className={`p-6 md:p-8 border-t transition-colors ${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-100'}`}>
+          <div className={`p-4 md:p-12 border-t transition-colors z-20 ${theme === 'dark' ? 'bg-[#0a0a0a] border-gray-800' : 'bg-white border-gray-100'}`}>
             {step === 1 && (
-              <div className={`grid gap-3 ${isExpanded ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}>
+              <div className={`grid gap-3 ${isExpanded ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}>
                 {MOTIVES.map(m => (
                   <button 
                     key={m.id}
                     onClick={() => handleMotiveSelect(m.id, m.label)}
                     className={`
-                      w-full text-left p-5 text-xs font-bold rounded-2xl transition-all border flex items-center group shadow-sm
-                      ${theme === 'dark' ? 'bg-[#2d2d2d] border-gray-800 hover:bg-[#3d3d3d]' : 'bg-gray-50 border-gray-100 hover:bg-[#27AE60] hover:text-white'}
+                      w-full text-left p-4 md:p-6 text-xs md:text-base font-bold rounded-2xl md:rounded-[1.5rem] transition-all border flex items-center group shadow-md
+                      ${theme === 'dark' ? 'bg-[#1e1e1e] border-gray-800 hover:bg-[#27AE60] hover:border-[#27AE60]' : 'bg-gray-50 border-gray-100 hover:bg-[#27AE60] hover:text-white'}
                     `}
                   >
-                    <span className="mr-3 text-xl group-hover:scale-110 transition-transform">{m.label.split(' ')[0]}</span>
-                    <span>{m.label.split(' ').slice(1).join(' ')}</span>
+                    <span className="mr-3 md:mr-4 text-xl md:text-3xl group-hover:scale-125 transition-transform">{m.label.split(' ')[0]}</span>
+                    <span className="flex-1">{m.label.split(' ').slice(1).join(' ')}</span>
                   </button>
                 ))}
               </div>
             )}
 
             {(step === 2 || step === 3 || step === 4 || step === 6) && (
-              <form onSubmit={handleInfoSubmit} className="flex flex-col space-y-4">
-                <div className="flex space-x-3">
+              <form onSubmit={handleInfoSubmit} className="flex flex-col space-y-4 max-w-4xl mx-auto">
+                <div className="flex space-x-2 md:space-x-4">
                   <input 
                     autoFocus
                     name="info"
                     autoComplete="off"
                     placeholder="Sua resposta..."
                     className={`
-                      flex-1 p-5 text-sm rounded-3xl outline-none border-2 transition-all
-                      ${theme === 'dark' ? 'bg-[#2d2d2d] border-gray-800 focus:border-[#27AE60] text-white' : 'bg-gray-50 border-gray-100 focus:border-[#27AE60] text-[#2C3E50]'}
+                      flex-1 p-4 md:p-8 text-sm md:text-xl rounded-[1.5rem] md:rounded-[2rem] outline-none border-2 transition-all shadow-inner
+                      ${theme === 'dark' ? 'bg-[#1e1e1e] border-gray-800 focus:border-[#27AE60] text-white' : 'bg-gray-50 border-gray-100 focus:border-[#27AE60] text-[#2C3E50]'}
                     `}
                   />
-                  <button type="submit" className="bg-[#27AE60] text-white px-6 rounded-3xl hover:bg-[#219150] transition-all shadow-lg active:scale-95">
-                    🚀
+                  <button type="submit" className="bg-[#27AE60] text-white px-5 md:px-12 rounded-[1.5rem] md:rounded-[2rem] hover:bg-[#219150] transition-all shadow-xl active:scale-95 text-lg font-bold">
+                    OK
                   </button>
                 </div>
-                <p className="text-[10px] text-center text-gray-500 font-bold uppercase tracking-widest">Enter para enviar</p>
+                <p className="text-[10px] text-center text-gray-500 font-black uppercase tracking-[0.2em]">Pressione ENTER</p>
               </form>
             )}
 
             {step === 5 && (
-              <div className={`grid gap-2 ${isExpanded ? 'grid-cols-3 md:grid-cols-6' : 'grid-cols-2'}`}>
+              <div className={`grid gap-2 ${isExpanded ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-6' : 'grid-cols-2'}`}>
                 {PROVINCES.map(p => (
                   <button 
                     key={p} 
                     onClick={() => handleProvinceSelect(p)}
                     className={`
-                      p-3 text-[9px] font-black rounded-xl transition-all border uppercase
-                      ${theme === 'dark' ? 'bg-[#2d2d2d] border-gray-800 hover:bg-[#27AE60]' : 'bg-gray-50 border-gray-100 hover:bg-[#27AE60] hover:text-white'}
+                      p-3 md:p-4 text-[8px] md:text-xs font-black rounded-xl md:rounded-2xl transition-all border uppercase tracking-wider
+                      ${theme === 'dark' ? 'bg-[#1e1e1e] border-gray-800 hover:bg-[#27AE60]' : 'bg-gray-50 border-gray-100 hover:bg-[#27AE60] hover:text-white'}
                     `}
                   >
                     {p}
@@ -328,16 +314,16 @@ const ChatRobot: React.FC = () => {
             )}
 
             {step === 7 && (
-              <div className={`flex flex-col space-y-4 ${isExpanded ? 'max-w-md mx-auto' : ''}`}>
+              <div className={`flex flex-col space-y-4 md:space-y-5 ${isExpanded ? 'max-w-2xl mx-auto' : ''}`}>
                 <button 
                   onClick={() => finishFlow(true)}
-                  className="w-full py-6 bg-gradient-to-r from-[#27AE60] to-[#219150] text-white rounded-3xl text-lg font-black shadow-[0_20px_50px_rgba(39,174,96,0.4)] hover:scale-[1.03] transition-all"
+                  className="w-full py-5 md:py-10 bg-gradient-to-r from-[#27AE60] to-[#219150] text-white rounded-[1.5rem] md:rounded-[2.5rem] text-lg md:text-2xl font-black shadow-[0_20px_60px_rgba(39,174,96,0.4)] hover:scale-[1.02] transition-all border-b-4 md:border-b-8 border-[#1a7440] active:border-b-0 active:translate-y-1"
                 >
-                  FINALIZAR & FALAR NO WHATSAPP 🏁
+                  FINALIZAR & WHATSAPP 🏁
                 </button>
                 <button 
                   onClick={() => finishFlow(false)}
-                  className={`w-full py-4 rounded-2xl text-xs font-black transition-all uppercase tracking-widest ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+                  className={`w-full py-3 md:py-5 rounded-xl md:rounded-[1.5rem] text-[10px] md:text-xs font-black transition-all uppercase tracking-widest ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
                 >
                   Fechar apenas
                 </button>
@@ -347,45 +333,47 @@ const ChatRobot: React.FC = () => {
             {step === 8 && (
               <button 
                 onClick={() => { setMessages([]); setStep(0); setIsOpen(false); setIsExpanded(false); }}
-                className={`w-full py-5 rounded-3xl text-sm font-black transition-all border-2 border-dashed ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}
+                className={`w-full py-4 md:py-6 rounded-2xl md:rounded-[2rem] text-xs md:text-base font-black transition-all border-2 border-dashed ${theme === 'dark' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}
               >
-                SAIR DO SUPORTE
+                SAIR DO SUPORTE TULU
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* Main Trigger */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-24 h-24 bg-gradient-to-br from-[#27AE60] to-[#219150] text-white rounded-[2.5rem] shadow-[0_25px_60px_rgba(39,174,96,0.4)] flex items-center justify-center hover:scale-110 transition-all duration-500 relative group border-8 border-white"
-      >
-        <div className={`absolute -top-16 right-0 text-[10px] font-black py-3 px-6 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0 whitespace-nowrap pointer-events-none border flex items-center space-x-2 ${theme === 'dark' ? 'bg-[#2C3E50] border-gray-700' : 'bg-white border-gray-100 text-[#2C3E50]'}`}>
-           <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-           <span>Ajuda Tecnológica Tulu? 🤖</span>
-        </div>
-        
-        {isOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-          </svg>
-        ) : (
-          <div className="relative transform group-hover:rotate-6 transition-all">
-             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <rect x="3" y="11" width="18" height="10" rx="3" />
-                <circle cx="12" cy="5" r="2.5" />
-                <path d="M12 7.5v3.5" />
-                <line x1="8" y1="16" x2="8" y2="16.01" />
-                <line x1="16" y1="16" x2="16" y2="16.01" />
-             </svg>
-            <span className="absolute -top-1 -right-1 flex h-7 w-7">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-7 w-7 bg-red-600 border-4 border-white shadow-lg"></span>
-            </span>
+      {/* Main Trigger Button */}
+      {(!isOpen || !isExpanded) && (
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-[#27AE60] to-[#219150] text-white rounded-3xl md:rounded-[2.5rem] shadow-[0_25px_60px_rgba(39,174,96,0.4)] flex items-center justify-center hover:scale-110 transition-all duration-500 relative group border-4 md:border-8 border-white"
+        >
+          <div className={`absolute -top-16 right-0 text-[10px] font-black py-3 px-6 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0 whitespace-nowrap pointer-events-none border flex items-center space-x-2 ${theme === 'dark' ? 'bg-[#2C3E50] border-gray-700' : 'bg-white border-gray-100 text-[#2C3E50]'}`}>
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+            <span>Relatar Erro na Landing Page? 🤖</span>
           </div>
-        )}
-      </button>
+          
+          {isOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-10 md:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+            </svg>
+          ) : (
+            <div className="relative transform group-hover:rotate-12 transition-all scale-75 md:scale-100">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="3" y="11" width="18" height="10" rx="3" />
+                  <circle cx="12" cy="5" r="2.5" />
+                  <path d="M12 7.5v3.5" />
+                  <line x1="8" y1="16" x2="8" y2="16.01" />
+                  <line x1="16" y1="16" x2="16" y2="16.01" />
+              </svg>
+              <span className="absolute -top-1 -right-1 flex h-6 w-6">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-6 w-6 bg-red-600 border-2 border-white shadow-lg"></span>
+              </span>
+            </div>
+          )}
+        </button>
+      )}
     </div>
   );
 };
