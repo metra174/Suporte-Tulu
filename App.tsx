@@ -1,12 +1,12 @@
 
 import React from 'react';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import MultiStepForm from './components/MultiStepForm';
-import SocialProof from './components/SocialProof';
-import FAQ from './components/FAQ';
-import Footer from './components/Footer';
-import ChatRobot from './components/ChatRobot';
+import Header from './components/Header.tsx';
+import Hero from './components/Hero.tsx';
+import MultiStepForm from './components/MultiStepForm.tsx';
+import SocialProof from './components/SocialProof.tsx';
+import FAQ from './components/FAQ.tsx';
+import Footer from './components/Footer.tsx';
+import ChatRobot from './components/ChatRobot.tsx';
 
 function App() {
   return (

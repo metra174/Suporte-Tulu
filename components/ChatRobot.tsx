@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Motive, FormData } from '../types';
-import { MOTIVES, PROVINCES, SUPPORT_WHATSAPP } from '../constants';
+import { Motive, FormData } from '../types.ts';
+import { MOTIVES, PROVINCES, SUPPORT_WHATSAPP } from '../constants.ts';
 
 type Message = {
   id: number;
@@ -21,8 +21,20 @@ const ChatRobot: React.FC = () => {
   };
 
   useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('open-tulu-robot', handleOpen);
+    return () => window.removeEventListener('open-tulu-robot', handleOpen);
+  }, []);
+
+  useEffect(() => {
     if (isOpen && messages.length === 0) {
-      addBotMessage("Olá! Você está na Central de Suporte TULU. Para agilizar o seu atendimento, por favor, escolha o motivo do contato.");
+      addBotMessage(
+        <div>
+          <p className="font-bold mb-2">Olá! Sou o Robô de Suporte Tulu. 🤖</p>
+          <p>Para começarmos, escolha o motivo abaixo.</p>
+          <p className="mt-2 text-[11px] text-[#27AE60] font-bold">⚠️ IMPORTANTE: Quando terminar ou quiser sair, aperte em "FINALIZAR" para ser redirecionado ao WhatsApp e enviar a mensagem para ter um atendimento de qualidade.</p>
+        </div>
+      );
       setStep(1);
     }
     scrollToBottom();
@@ -74,7 +86,7 @@ const ChatRobot: React.FC = () => {
     } else if (step === 6) {
       setFormData(prev => ({ ...prev, description: input }));
       setTimeout(() => {
-        addBotMessage("Já registrei todos os seus dados e o motivo da sua reclamação. Você deseja que eu envie agora essas informações para um atendente humano (Suporte em Vida Real) para um atendimento personalizado via WhatsApp?");
+        addBotMessage("Já registrei tudo! Agora, clique em FINALIZAR para falar com nosso suporte humano via WhatsApp e garantir sua solução rápida.");
         setStep(7);
       }, 500);
     }
@@ -92,7 +104,7 @@ const ChatRobot: React.FC = () => {
   };
 
   const finishFlow = (toWhatsApp: boolean) => {
-    addUserMessage(toWhatsApp ? "SIM, falar com suporte agora." : "Não, apenas registrar e-mail.");
+    addUserMessage(toWhatsApp ? "FINALIZAR E IR PARA WHATSAPP" : "Apenas fechar.");
     
     if (toWhatsApp) {
       const message = `🚨 NOVO CHAMADO DE SUPORTE - TULU\n\n` +
@@ -103,14 +115,14 @@ const ChatRobot: React.FC = () => {
                       `* E-mail: ${formData.email}\n` +
                       `* Motivo: ${formData.motive}\n` +
                       `* Descrição: ${formData.description}\n\n` +
-                      `Aguardando atendimento humano.`;
+                      `Desejo um atendimento de qualidade. Aguardo suporte humano.`;
 
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodedMessage}`, '_blank');
     }
 
     setTimeout(() => {
-      addBotMessage("Tudo pronto! Protocolo registrado com sucesso. Nossa equipe entrará em contato em breve.");
+      addBotMessage("Atendimento concluído. Obrigado por utilizar o Suporte Tulu!");
       setStep(8);
     }, 800);
   };
@@ -122,14 +134,16 @@ const ChatRobot: React.FC = () => {
           {/* Header */}
           <div className="bg-[#2C3E50] p-4 flex items-center justify-between text-white shadow-lg">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-[#2C3E50] shadow-sm overflow-hidden">
-                <span className="text-xl">T</span>
+              <div className="w-10 h-10 bg-[#27AE60] rounded-full flex items-center justify-center font-bold text-white shadow-sm overflow-hidden border-2 border-white/20">
+                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
               </div>
               <div>
-                <p className="font-bold text-sm leading-tight">Robô Tulu</p>
+                <p className="font-bold text-sm leading-tight">Robô Tulu 🤖</p>
                 <div className="flex items-center space-x-1">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                  <span className="text-[10px] text-gray-300">Central de Ajuda</span>
+                  <span className="text-[10px] text-gray-300">Triagem Inteligente</span>
                 </div>
               </div>
             </div>
@@ -169,24 +183,38 @@ const ChatRobot: React.FC = () => {
                     {m.label}
                   </button>
                 ))}
+                <button 
+                  onClick={() => finishFlow(true)}
+                  className="col-span-2 mt-2 p-2 text-[10px] font-bold text-[#27AE60] border border-[#27AE60] rounded-lg hover:bg-green-50 transition-colors"
+                >
+                  FINALIZAR AGORA 🏁
+                </button>
               </div>
             )}
 
             {(step === 2 || step === 3 || step === 5 || step === 6) && (
-              <form onSubmit={handleInfoSubmit} className="flex space-x-2">
-                <input 
-                  autoFocus
-                  name="info"
-                  autoComplete="off"
-                  placeholder="Responda aqui..."
-                  className="flex-1 p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#27AE60] outline-none transition-all"
-                />
-                <button type="submit" className="bg-[#2C3E50] text-white p-3 rounded-xl hover:bg-black transition-transform active:scale-95 shadow-md">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                  </svg>
+              <div className="flex flex-col space-y-2">
+                <form onSubmit={handleInfoSubmit} className="flex space-x-2">
+                  <input 
+                    autoFocus
+                    name="info"
+                    autoComplete="off"
+                    placeholder="Responda aqui..."
+                    className="flex-1 p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#27AE60] outline-none transition-all"
+                  />
+                  <button type="submit" className="bg-[#2C3E50] text-white p-3 rounded-xl hover:bg-black transition-transform active:scale-95 shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                  </button>
+                </form>
+                <button 
+                  onClick={() => finishFlow(true)}
+                  className="text-[10px] font-bold text-gray-400 hover:text-[#27AE60] self-center"
+                >
+                  Pular para Finalizar 🏁
                 </button>
-              </form>
+              </div>
             )}
 
             {step === 4 && (
@@ -214,15 +242,15 @@ const ChatRobot: React.FC = () => {
               <div className="flex flex-col space-y-2">
                 <button 
                   onClick={() => finishFlow(true)}
-                  className="w-full py-4 bg-[#27AE60] text-white rounded-xl text-sm font-bold shadow-lg shadow-green-100 hover:bg-[#219150] transition-all"
+                  className="w-full py-4 bg-[#27AE60] text-white rounded-xl text-sm font-bold shadow-lg shadow-green-100 hover:bg-[#219150] transition-all transform hover:scale-[1.02]"
                 >
-                  SIM, falar com suporte agora.
+                  FINALIZAR E IR PARA WHATSAPP 🏁
                 </button>
                 <button 
                   onClick={() => finishFlow(false)}
                   className="w-full py-3 bg-[#2C3E50] text-white rounded-xl text-xs font-bold shadow-md hover:bg-black transition-all"
                 >
-                  Não, apenas registrar e-mail.
+                  Não, apenas fechar.
                 </button>
               </div>
             )}
@@ -232,20 +260,20 @@ const ChatRobot: React.FC = () => {
                 onClick={() => { setMessages([]); setStep(0); setIsOpen(false); }}
                 className="w-full py-3 bg-gray-100 text-[#2C3E50] rounded-xl text-sm font-bold hover:bg-gray-200 transition-all"
               >
-                Fechar Atendimento
+                Sair do Atendimento
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* Trigger Button */}
+      {/* Trigger Button - Robot Design */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="w-16 h-16 bg-[#27AE60] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform relative group border-4 border-white"
       >
         <div className="absolute -top-12 right-0 bg-white text-[#2C3E50] text-[10px] font-bold py-1.5 px-3 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-gray-100">
-           Precisa de ajuda? 👋
+           Robô de Suporte Online! 🤖
         </div>
         {isOpen ? (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -254,7 +282,7 @@ const ChatRobot: React.FC = () => {
         ) : (
           <div className="relative">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
             </svg>
             <span className="absolute -top-1 -right-1 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
