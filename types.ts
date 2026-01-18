@@ -1,10 +1,11 @@
 
 export enum Motive {
-  LOGISTICS = 'Problema com Entrega / Logística',
-  PAYMENTS = 'Dúvida sobre Pagamentos / Faturas',
-  DEFECT = 'Defeito de Produto / Serviço',
-  DATA = 'Alteração de Dados Cadastrais',
-  OTHERS = 'Outros Assuntos'
+  TECH_ERROR = 'Erro Técnico / Link Quebrado',
+  CONVERSION = 'Baixa Conversão / Vendas',
+  DESIGN = 'Design / Visual Desconfigurado',
+  SPEED = 'Lentidão / Carregamento',
+  CONTENT = 'Erro de Conteúdo',
+  OTHERS = 'Outro erro específico'
 }
 
 export interface FormData {
@@ -16,6 +17,7 @@ export interface FormData {
   province: string;
   address: string;
   description: string;
+  followUpAnswer?: string;
 }
 
 export interface FAQItem {

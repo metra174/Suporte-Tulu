@@ -1,5 +1,5 @@
 
-import { Motive, FAQItem } from './types';
+import { Motive, FAQItem } from './types.ts';
 
 export const SUPPORT_EMAIL = 'tulu.geral@gmail.com';
 export const SUPPORT_WHATSAPP = '244955409474';
@@ -11,11 +11,12 @@ export const PROVINCES = [
 ];
 
 export const MOTIVES = [
-  { id: Motive.LOGISTICS, label: '📦 Entrega', icon: '📦' },
-  { id: Motive.PAYMENTS, label: '💳 Pagamento', icon: '💳' },
-  { id: Motive.DEFECT, label: '🛠️ Defeito', icon: '🛠️' },
-  { id: Motive.DATA, label: '👤 Cadastro', icon: '👤' },
-  { id: Motive.OTHERS, label: '❓ Outros', icon: '❓' },
+  { id: Motive.TECH_ERROR, label: '❌ Erro Técnico / Link Quebrado', icon: '❌' },
+  { id: Motive.CONVERSION, label: '📉 Baixa Conversão / Vendas', icon: '📉' },
+  { id: Motive.DESIGN, label: '🎨 Design / Visual Desconfigurado', icon: '🎨' },
+  { id: Motive.SPEED, label: '⏱️ Lentidão / Carregamento', icon: '⏱️' },
+  { id: Motive.CONTENT, label: '📝 Erro de Conteúdo', icon: '📝' },
+  { id: Motive.OTHERS, label: '❓ Outro erro específico', icon: '❓' },
 ];
 
 export const FAQS: FAQItem[] = [
